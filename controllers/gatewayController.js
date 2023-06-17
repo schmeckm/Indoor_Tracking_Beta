@@ -1,0 +1,80 @@
+const gateway = require('../models/gateway');
+
+function handleResponse(res, success, data, errorMessage, statusCode) {
+  if (success) {
+    res.status(statusCode).json({ success: true, data });
+  } else {
+    res.status(statusCode).json({ success: false, error: errorMessage });
+  }
+}
+
+exports.getAllGateways = async (req, res) => {
+  try {
+    const gateways = await gateway.find();
+    handleResponse(res, true, gateways, null, 200);
+  } catch (error) {
+    handleResponse(res, false, null, error.message, 500);
+  }
+};
+
+exports.addGateway = async (req, res) => {
+  try {
+    const gateway = await gateway.create(req.body);
+    handleResponse(res, true, gateway, null, 200);
+  } catch (error) {
+    handleResponse(res, false, null, error.message, 500);
+  }
+};
+
+exports.deleteGateway = async (req, res) => {
+  try {
+    const { gatewayId } = req.params;
+    const gateway = await gateway.findOneAndDelete({ _id: gatewayId });
+
+    if (!gateway) {
+      handleResponse(res, false, null, 'Gateway not found', 404);
+    } else {
+      handleResponse(res, true, 'Gateway Deleted Successfully', null, 200);
+    }
+  } catch (error) {
+    handleResponse(res, false, null, error.message, 500);
+  }
+};
+
+exports.updateGateway = async (req, res) => {
+  try {
+    const { gatewayId } = req.params;
+    const gateway = await gateway.findOne({ _id: gatewayId });
+
+    if (!gateway) {
+      handleResponse(res, false, null, 'Gateway not found', 404);
+      return;
+    }
+
+    if (req.body.gatewayMac) {
+      handleResponse(res, false, 'You cannot update a gateway\'s mac address', null, 400);
+      return;
+    }
+
+    const updatedGateway = await Gateway.findByIdAndUpdate(gatewayId, req.body, { new: true });
+
+    handleResponse(res, true, updatedGateway, null, 200);
+  } catch (error) {
+    handleResponse(res, false, null, error.message, 500);
+  }
+};
+
+exports.getSingleGateway = async (req, res) => {
+  try {
+    const { gatewayId } = req.params;
+    const gateway = await gateway.findOne({ _id: gatewayId });
+
+    if (!gateway) {
+      handleResponse(res, false, null, 'Gateway not found', 404);
+    } else {
+      handleResponse(res, true, gateway, null, 200);
+    }
+  } catch (error) {
+    handleResponse(res, false, null, error.message, 500);
+  }
+};
