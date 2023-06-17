@@ -1,0 +1,19 @@
+{
+  "name": "indoor_tracking_beta",
+  "version": "1.0.0",
+  "description": "Inventory Solution Management",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/schmeckm/indoor_tracking_Beta.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/schmeckm/indoor_tracking_Beta/issues"
+  },
+  "homepage": "https://github.com/schmeckm/indoor_tracking_Beta#readme"
+}
