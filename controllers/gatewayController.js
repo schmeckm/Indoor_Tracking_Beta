@@ -28,8 +28,8 @@ exports.addGateway = async (req, res) => {
 
 exports.deleteGateway = async (req, res) => {
   try {
-    const { gatewayId } = req.params;
-    const deletedGateway = await Gateway.findOneAndDelete({ _id: gatewayId });
+    const { gatewayMac } = req.params;
+    const deletedGateway = await Gateway.findOneAndDelete({ gatewayMac });
 
     if (!deletedGateway) {
       handleResponse(res, false, null, 'Gateway not found', 404);
@@ -43,8 +43,8 @@ exports.deleteGateway = async (req, res) => {
 
 exports.updateGateway = async (req, res) => {
   try {
-    const { gatewayId } = req.params;
-    const foundGateway = await Gateway.findOne({ _id: gatewayId });
+    const { gatewayMac } = req.params;
+    const foundGateway = await Gateway.findOne({ gatewayMac });
 
     if (!foundGateway) {
       handleResponse(res, false, null, 'Gateway not found', 404);
@@ -56,7 +56,7 @@ exports.updateGateway = async (req, res) => {
       return;
     }
 
-    const updatedGateway = await Gateway.findByIdAndUpdate(gatewayId, req.body, { new: true });
+    const updatedGateway = await Gateway.findOneAndUpdate({ gatewayMac }, req.body, { new: true });
 
     handleResponse(res, true, updatedGateway, null, 200);
   } catch (error) {
@@ -66,8 +66,8 @@ exports.updateGateway = async (req, res) => {
 
 exports.getSingleGateway = async (req, res) => {
   try {
-    const { gatewayId } = req.params;
-    const gateway = await Gateway.findOne({ _id: gatewayId });
+    const { gatewayMac } = req.params;
+    const gateway = await Gateway.findOne({ gatewayMac });
 
     if (!gateway) {
       handleResponse(res, false, null, 'Gateway not found', 404);
