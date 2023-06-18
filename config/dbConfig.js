@@ -1,25 +1,20 @@
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
-// Setze die strictQuery-Option entsprechend der gewünschten Konfiguration
-mongoose.set('strictQuery', false); // oder mongoose.set('strictQuery', true);
 
 dotenv.config({ path: '.env' });
 
-const dbConn = () => {
-	mongoose
-		.connect(
-			// mongo db uri to connect our database
-			process.env.MongoDB_URI,
-			{
-				useNewUrlParser: true,
-				//useCreateIndex: true,
-				////useFindAndModify: false,
-				//seUnifiedTopology: true,
-			}
-		)
-		.then(db => console.log('Database is connected successfully'))
-		.catch(err => console.log(err))
-		
+mongoose.set('strictQuery', false);
+
+const dbConn = async () => {
+  try {
+    await mongoose.connect(process.env.MongoDB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log('Database is connected successfully');
+  } catch (error) {
+    console.log('Error connecting to the database:', error.message);
+  }
 };
 
 module.exports = dbConn;
