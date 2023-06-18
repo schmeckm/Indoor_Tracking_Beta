@@ -25,3 +25,4 @@ jobs:
       - name: Server aktualisieren
         run: |
           ssh root@136.244.89.4 'cd /Indoor_Tracking_Beta && git pull'
+
