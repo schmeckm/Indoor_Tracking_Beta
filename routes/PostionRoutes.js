@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const beaconController = require('../controllers/beaconController');
+const positionController = require('../controllers/positionController');
 
-router.get('/getPosition', beaconController.getPosition);
+router.get('/getPosition', positionController.getPosition);
 
 module.exports = router;
