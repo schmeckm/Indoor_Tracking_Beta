@@ -4,8 +4,6 @@ const mongoose = require('mongoose');
 dotenv.config({ path: '.env' });
 console.log('MongoDB URI:', process.env.MongoDB_URI);
 
-MongoDB_URI = "mongodb+srv://schmeckm:VyZsyVQviGAjffqG@indoortracking.abzl9.mongodb.net/IndoorTracking?retryWrites=true&w=majority";
-
 mongoose.set('strictQuery', false);
 
 const dbConn = async () => {
