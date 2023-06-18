@@ -7,21 +7,21 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
-      - name: Checkout-Code
+      - name: Checkout Code
         uses: actions/checkout@v2
       
-      - name: SSH-Client installieren
+      - name: Install SSH client
         run: sudo apt-get install openssh-client -y
       
-      - name: SSH-Schlüssel konfigurieren
+      - name: Configure SSH keys
         run: |
           mkdir -p ~/.ssh
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
         
-      - name: Server aktualisieren
+      - name: Update Server
         run: |
           ssh root@136.244.89.4 'cd /Indoor_Tracking_Beta && git pull'
