@@ -1,6 +1,11 @@
 const dbBeacon = require('../models/dbBeacon');
-
+const dotenv = require('dotenv');
 const axios = require('axios');
+
+dotenv.config({ path: '.env' });
+
+const apiUrl = process.env.PARETOANYWHERE_URL; // Verwenden Sie die Umgebungsvariable für die API-URL
+const PORT = process.env.PORT; // Verwenden Sie die Umgebungsvariable für die API-URL
 
 exports.getPosition = async (req, res) => {
   try {
@@ -11,7 +16,7 @@ exports.getPosition = async (req, res) => {
       const beaconMac = beacon.beaconMac.toLowerCase();
 
       try {
-        const apiResponse = await axios.get(`http://199.247.8.233:3001/devices/${beaconMac}/2`);
+        const apiResponse = await axios.get(`${apiUrl}/devices/${beaconMac}/2`); // Verwenden Sie die Umgebungsvariable in der API-Anfrage
         const deviceData = apiResponse.data.devices[`${beaconMac}/2`];
 
         if (deviceData) {
@@ -34,7 +39,7 @@ exports.getPosition = async (req, res) => {
             };
 
             try {
-              const gatewayApiResponse = await axios.get(`http://192.168.1.128:3001/api/gateway/getSingleGateway/${highestRssiGateway.receiverId.toUpperCase()}`);
+              const gatewayApiResponse = await axios.get(`http://localhost:${PORT}/api/gateway/getSingleGateway/${highestRssiGateway.receiverId.toUpperCase()}`);
               const gatewayData = gatewayApiResponse.data.data;
 
               if (gatewayData.latitude && gatewayData.longitude) {
@@ -71,7 +76,7 @@ exports.getPosition = async (req, res) => {
       }
 
       try {
-        const secondApiResponse = await axios.get(`http://199.247.8.233:3001/context/device/${beaconMac}/2`);
+        const secondApiResponse = await axios.get(`${apiUrl}/context/device/${beaconMac}/2`);
         const secondApiData = secondApiResponse.data;
         const deviceId = `${beaconMac}/2`;
 
