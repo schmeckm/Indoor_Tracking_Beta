@@ -1,4 +1,4 @@
-const gateway = require('../models/gateway');
+const Gateway = require('../models/gateway');
 
 function handleResponse(res, success, data, errorMessage, statusCode) {
   if (success) {
@@ -10,7 +10,7 @@ function handleResponse(res, success, data, errorMessage, statusCode) {
 
 exports.getAllGateways = async (req, res) => {
   try {
-    const gateways = await gateway.find();
+    const gateways = await Gateway.find();
     handleResponse(res, true, gateways, null, 200);
   } catch (error) {
     handleResponse(res, false, null, error.message, 500);
@@ -19,8 +19,8 @@ exports.getAllGateways = async (req, res) => {
 
 exports.addGateway = async (req, res) => {
   try {
-    const gateway = await gateway.create(req.body);
-    handleResponse(res, true, gateway, null, 200);
+    const newGateway = await Gateway.create(req.body);
+    handleResponse(res, true, newGateway, null, 200);
   } catch (error) {
     handleResponse(res, false, null, error.message, 500);
   }
@@ -29,9 +29,9 @@ exports.addGateway = async (req, res) => {
 exports.deleteGateway = async (req, res) => {
   try {
     const { gatewayId } = req.params;
-    const gateway = await gateway.findOneAndDelete({ _id: gatewayId });
+    const deletedGateway = await Gateway.findOneAndDelete({ _id: gatewayId });
 
-    if (!gateway) {
+    if (!deletedGateway) {
       handleResponse(res, false, null, 'Gateway not found', 404);
     } else {
       handleResponse(res, true, 'Gateway Deleted Successfully', null, 200);
@@ -44,15 +44,15 @@ exports.deleteGateway = async (req, res) => {
 exports.updateGateway = async (req, res) => {
   try {
     const { gatewayId } = req.params;
-    const gateway = await gateway.findOne({ _id: gatewayId });
+    const foundGateway = await Gateway.findOne({ _id: gatewayId });
 
-    if (!gateway) {
+    if (!foundGateway) {
       handleResponse(res, false, null, 'Gateway not found', 404);
       return;
     }
 
     if (req.body.gatewayMac) {
-      handleResponse(res, false, 'You cannot update a gateway\'s mac address', null, 400);
+      handleResponse(res, false, 'You cannot update a gateway\'s MAC address', null, 400);
       return;
     }
 
@@ -67,7 +67,7 @@ exports.updateGateway = async (req, res) => {
 exports.getSingleGateway = async (req, res) => {
   try {
     const { gatewayId } = req.params;
-    const gateway = await gateway.findOne({ _id: gatewayId });
+    const gateway = await Gateway.findOne({ _id: gatewayId });
 
     if (!gateway) {
       handleResponse(res, false, null, 'Gateway not found', 404);
