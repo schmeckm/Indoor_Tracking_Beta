@@ -10,7 +10,7 @@ exports.getAllZones = async (req, res) => {
 		{
 			"$project": {
 				"_id": 0,
-				"zone_ids": "$$ROOT"
+				"zone": "$$ROOT"
 			}
 		},
 		{
@@ -83,7 +83,7 @@ exports.deleteZone = async (req, res) => {
 			});
 		}
 
-		await Zone_Id.findOneAndDelete({ _id: zoneId });
+		await zone.findOneAndDelete({ _id: zoneId });
 
 		res.status(200).json({
 			success: true,
