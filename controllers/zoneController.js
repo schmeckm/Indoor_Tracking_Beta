@@ -1,4 +1,4 @@
-const Zone_Id = require('../models/Zones');
+const Zone_Id = require('../models/zones');
 
 exports.getAllZones = async (req, res) => {
 
@@ -29,6 +29,7 @@ exports.getAllZones = async (req, res) => {
 		},
 		{
 			"$project": {
+				"zone_ids._id": "$zone_ids._id",
 				"zone_ids.zoneId": "$zone_ids.zoneId",
 				"zone_ids.description": "$zone_ids.description",
 				"zone_ids.text1": "$zone_ids.text1",

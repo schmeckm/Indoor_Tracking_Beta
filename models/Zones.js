@@ -11,4 +11,4 @@ const zoneSchema = new mongoose.Schema({
 	text2: String,
 });
 
-module.exports = mongoose.model('Zone_Id', zoneSchema);
+module.exports = mongoose.model('zones', zoneSchema);
