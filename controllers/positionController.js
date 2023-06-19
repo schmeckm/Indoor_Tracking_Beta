@@ -39,7 +39,9 @@ exports.getPosition = async (req, res) => {
             };
 
             try {
-              const gatewayApiResponse = await axios.get(`http://localhost:${PORT}/api/gateway/getSingleGateway/${highestRssiGateway.receiverId.toUpperCase()}`);
+              console.log(highestRssiGateway.receiverId);
+              const gatewayApiResponse = await axios.get(`http://localhost:${process.env.PORT}/api/gateway/getSingleGatewayByMAC/${highestRssiGateway.receiverId.toUpperCase()}`);
+              console.log(gatewayApiResponse);
               const gatewayData = gatewayApiResponse.data.data;
 
               if (gatewayData.latitude && gatewayData.longitude) {

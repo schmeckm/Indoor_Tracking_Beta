@@ -77,4 +77,25 @@ exports.getSingleGateway = async (req, res) => {
   } catch (error) {
     handleResponse(res, false, null, error.message, 500);
   }
+  
 };
+exports.getSingleGatewayByMAC = async (req, res) => {
+  try {
+    const { gatewayId } = req.params;
+    const gateway = await Gateway.findOne({ gatewayMac: gatewayId });
+
+    if (!gateway) {
+      handleResponse(res, false, null, 'Gateway not found', 404);
+    } else {
+      handleResponse(res, true, gateway, null, 200);
+    }
+  } catch (error) {
+    handleResponse(res, false, null, error.message, 500);
+  }
+};
+
+
+
+
+
+
