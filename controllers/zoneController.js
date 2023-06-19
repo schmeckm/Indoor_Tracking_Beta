@@ -1,4 +1,4 @@
-const Zone_Id = require('../models/zones');
+const zone = require('../models/zones');
 
 exports.getAllZones = async (req, res) => {
 
@@ -15,7 +15,7 @@ exports.getAllZones = async (req, res) => {
 		},
 		{
 			"$lookup": {
-				"localField": "zone_ids.environment",
+				"localField": "zone.environment",
 				"from": "environments",
 				"foreignField": "_id",
 				"as": "environments"
@@ -29,11 +29,11 @@ exports.getAllZones = async (req, res) => {
 		},
 		{
 			"$project": {
-				"zone_ids._id": "$zone_ids._id",
-				"zone_ids.zoneId": "$zone_ids.zoneId",
-				"zone_ids.description": "$zone_ids.description",
-				"zone_ids.text1": "$zone_ids.text1",
-				"zone_ids.text2": "$zone_ids.text2",
+				"zone._id": "$zone._id",
+				"zone.zoneId": "$zone.zoneId",
+				"zone.description": "$zone.description",
+				"zone.text1": "$zone.text1",
+				"zone.text2": "$zone.text2",
 				"environments.description": "$environments.description",
 				"_id": 0
 			}
@@ -42,7 +42,7 @@ exports.getAllZones = async (req, res) => {
 
 	try {
 
-		const zones = await Zone_Id.aggregate(pipeline, options);
+		const zones = await zone.aggregate(pipeline, options);
 		res.status(200).json({
 			success: true,
 			data: zones,
@@ -57,7 +57,7 @@ exports.getAllZones = async (req, res) => {
 
 exports.addZone = async (req, res) => {
 	try {
-		const zone = await Zone_Id.create(req.body);
+		const zone = await zone.create(req.body);
 		res.status(200).json({
 			success: true,
 			data: zone,
@@ -74,7 +74,7 @@ exports.deleteZone = async (req, res) => {
 	try {
 		c
 
-		const zone = await Zone_Id.findOne({ _id: zoneId });
+		const zone = await zone.findOne({ _id: zoneId });
 
 		if (!zone) {
 			return res.status(404).json({
@@ -101,7 +101,7 @@ exports.updateZone = async (req, res) => {
 	try {
 		const { zoneId } = req.params;
 
-		const zone = await Zone_Id.findOne({ _id: zoneId });
+		const zone = await zone.findOne({ _id: zoneId });
 
 		if (!zone) {
 			return res.status(404).json({
@@ -110,7 +110,7 @@ exports.updateZone = async (req, res) => {
 			});
 		}
 
-		await Zone_Id.findOneAndUpdate({ _id: zoneId }, req.body);
+		await zone.findOneAndUpdate({ _id: zoneId }, req.body);
 
 		res.status(200).json({
 			success: true,
@@ -128,7 +128,7 @@ exports.getSingleZone = async (req, res) => {
 	try {
 		const { zoneId } = req.params;
 
-		const zone = await Zone_Id.findOne({ _id: zoneId });
+		const zone = await zone.findOne({ _id: zoneId });
 
 		if (!zone) {
 			return res.status(404).json({
