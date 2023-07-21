@@ -40,7 +40,7 @@ exports.deleteGateway = async (req, res) => {
     handleResponse(res, false, null, error.message, 500);
   }
 };
-
+//dddddd
 exports.updateGateway = async (req, res) => {
   try {
     const { gatewayId } = req.params;
