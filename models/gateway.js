@@ -14,6 +14,7 @@ const gatewaySchema = new mongoose.Schema(
 		gatewayY: Number,
 		latitude: Number,
 		longitude: Number,
+		sapLocation: String,
 	},
 	{
 		timestamps: true,

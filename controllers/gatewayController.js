@@ -45,14 +45,10 @@ exports.updateGateway = async (req, res) => {
   try {
     const { gatewayId } = req.params;
     const foundGateway = await Gateway.findOne({ _id: gatewayId });
+    console.log(foundGateway);
 
     if (!foundGateway) {
       handleResponse(res, false, null, 'Gateway not found', 404);
-      return;
-    }
-
-    if (req.body.gatewayMac) {
-      handleResponse(res, false, 'You cannot update a gateway\'s MAC address', null, 400);
       return;
     }
 

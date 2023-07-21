@@ -8,6 +8,7 @@ const environmentSchema = new mongoose.Schema({
 	width: Number,
 	height: Number,
 	distance_points: Number,
+	image: String, // or specify the appropriate data type for the image field
 });
 
 module.exports = mongoose.model('Environment', environmentSchema);

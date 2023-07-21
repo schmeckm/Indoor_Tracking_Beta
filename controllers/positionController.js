@@ -47,6 +47,7 @@ exports.getPosition = async (req, res) => {
               if (gatewayData.latitude && gatewayData.longitude) {
                 beacon.nearestGatewayData.latitude = gatewayData.latitude;
                 beacon.nearestGatewayData.longitude = gatewayData.longitude;
+                beacon.nearestGatewayData.saplocation = gatewayData.sapLocation;
               }
             } catch (error) {
               console.error(`Error while calling the additional API for Gateway ${highestRssiGateway.receiverId.toUpperCase()}: ${error.message}`);
@@ -111,8 +112,7 @@ exports.getPosition = async (req, res) => {
           nearestGatewayData,
           dynamb,
           name,
-          uri,
-          nearest
+          uri
         }))
       }
     });
