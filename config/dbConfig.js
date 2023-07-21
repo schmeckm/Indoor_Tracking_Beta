@@ -1,9 +1,11 @@
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 
-dotenv.config({ path: '.env' });
+dotenv.config({ path: '../env' });
 
 mongoose.set('strictQuery', false);
+
+console.log(process.env.MongoDB_URI);
 
 const dbConn = async () => {
   try {
