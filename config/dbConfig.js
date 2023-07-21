@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 
 dotenv.config({ path: '../env' });
 
+console.log(process.env);
 console.log(process.env.MongoDB_URI);
 
 const dbConn = async () => {
