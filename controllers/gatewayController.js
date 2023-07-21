@@ -59,7 +59,7 @@ exports.updateGateway = async (req, res) => {
     handleResponse(res, false, null, error.message, 500);
   }
 };
-
+//Github
 exports.getSingleGateway = async (req, res) => {
   try {
     const { gatewayId } = req.params;
