@@ -2,8 +2,6 @@ const dbBeacon = require('../models/dbBeacon');
 const dotenv = require('dotenv');
 const axios = require('axios');
 
-dotenv.config({ path: '.env' });
-
 const apiUrl = process.env.PARETOANYWHERE_URL; // Verwenden Sie die Umgebungsvariable für die API-URL
 const PORT = process.env.PORT; // Verwenden Sie die Umgebungsvariable für die API-URL
 
@@ -16,7 +14,7 @@ exports.getPosition = async (req, res) => {
       const beaconMac = beacon.beaconMac.toLowerCase();
 
       try {
-        const apiResponse = await axios.get(`${apiUrl}/devices/${beaconMac}/2`); // Verwenden Sie die Umgebungsvariable in der API-Anfrage
+        const apiResponse = await axios.get(`http://localhost:${process.env.PORT}/devices/${beaconMac}/2`); // Verwenden Sie die Umgebungsvariable in der API-Anfrage
         const deviceData = apiResponse.data.devices[`${beaconMac}/2`];
 
         if (deviceData) {

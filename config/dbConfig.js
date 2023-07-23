@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const dbURI = 'mongodb+srv://schmeckm:VyZsyVQviGAjffqG@indoortracking.abzl9.mongodb.net/IndoorTracking?retryWrites=true&w=majority'; // Setze hier deine MongoDB-URI ein
+console.log(process.env.MongoDB_URI);
 
 const dbConn = async () => {
   try {
@@ -10,8 +10,8 @@ const dbConn = async () => {
       // Weitere Optionen können hier hinzugefügt werden, falls benötigt
     };
 
-    await mongoose.connect(dbURI, options);
-    console.log('Database is connected successfully to:', dbURI);
+    await mongoose.connect(process.env.MongoDB_URI, options);
+    console.log('Database is connected successfully to:',process.env.MongoDB_URI,);
   } catch (error) {
     // Bessere Fehlerbehandlung - z.B. Fehler in Log-Datei protokollieren
     console.error('Error connecting to the database:', error.message);
@@ -21,4 +21,3 @@ const dbConn = async () => {
 };
 
 module.exports = dbConn;
-
