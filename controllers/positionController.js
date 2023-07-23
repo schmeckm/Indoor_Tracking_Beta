@@ -36,7 +36,8 @@ exports.getPosition = async (req, res) => {
             };
 
             try {
-              console.error(`For ${beaconMac} the nearst Gateway is  ${highestRssiGateway.receiverId.toUpperCase()}`);
+              
+              console.log(`For ${beaconMac} the nearst Gateway is  ${highestRssiGateway.receiverId.toUpperCase()}`);
               
               //console.log(highestRssiGateway.receiverId);
 
