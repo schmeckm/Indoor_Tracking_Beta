@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 
 console.log(process.env.MongoDB_URI);
 
+//URL neu aufgebaut
+
 const dbConn = async () => {
   try {
     const options = {
