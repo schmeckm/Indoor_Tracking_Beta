@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 console.log(process.env.MongoDB_URI);
 console.log(process.env.PARETOANYWHERE_URL);
-console.log(process.env.PARETOANYWHERE_PORT);
+
 const dbConn = async () => {
   try {
     const options = {
