@@ -11,13 +11,14 @@ exports.getPosition = async (req, res) => {
 
       try {
     
+        //Read for Each BeaconMAC the the nearst Gateway
         const apiResponse = await axios.get(`${process.env.PARETOANYWHERE_URL}/context/device/${beaconMac}/2`); // Verwenden Sie die Umgebungsvariable in der API-Anfrage
         const deviceData = apiResponse.data.devices[`${beaconMac}/2`];
-        console.log(deviceData);
+        //console.log(deviceData);
 
         if (deviceData) {
           if (deviceData.raddec.rssiSignature && deviceData.raddec.rssiSignature.length > 0) {
-            // Find gateway with highest RSSI
+            // Find the gateway with highest RSSI, this is the Gateway next to the Beacon
             const highestRssiGateway = deviceData.raddec.rssiSignature.reduce((maxRssi, signature) => {
               if (signature.rssi > maxRssi.rssi) {
                 return signature;
@@ -35,7 +36,9 @@ exports.getPosition = async (req, res) => {
             };
 
             try {
-              console.log(highestRssiGateway.receiverId);
+              console.error(`For ${beaconMac} the nearst Gateway is  ${highestRssiGateway.receiverId.toUpperCase()}`);
+              
+              //console.log(highestRssiGateway.receiverId);
 
               const gatewayApiResponse = await axios.get(`${process.env.PARETOANYWHERE_URL}:${process.env.PORT}/api/gateway/getSingleGatewayByMAC/${highestRssiGateway.receiverId.toUpperCase()}`);
               const gatewayData = gatewayApiResponse.data.data;
