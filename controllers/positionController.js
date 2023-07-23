@@ -1,8 +1,6 @@
 const dbBeacon = require('../models/dbBeacon');
 const axios = require('axios');
 
-const apiUrl = process.env.PARETOANYWHERE_URL; // Verwenden Sie die Umgebungsvariable für die API-URL
-
 exports.getPosition = async (req, res) => {
   try {
     const beacons = await dbBeacon.find();
@@ -14,8 +12,8 @@ exports.getPosition = async (req, res) => {
       try {
     
         const apiResponse = await axios.get(`${process.env.PARETOANYWHERE_URL}/context/device/${beaconMac}/2`); // Verwenden Sie die Umgebungsvariable in der API-Anfrage
-        console.log(apiResponse);
         const deviceData = apiResponse.data.devices[`${beaconMac}/2`];
+        console.log(deviceData);
 
         if (deviceData) {
           if (deviceData.raddec.rssiSignature && deviceData.raddec.rssiSignature.length > 0) {
@@ -38,17 +36,17 @@ exports.getPosition = async (req, res) => {
 
             try {
               console.log(highestRssiGateway.receiverId);
-              const gatewayApiResponse = await axios.get(`http://localhost:${process.env.PORT}/api/gateway/getSingleGatewayByMAC/${highestRssiGateway.receiverId.toUpperCase()}`);
-              console.log(gatewayApiResponse);
-              const gatewayData = gatewayApiResponse.data.data;
 
+              const gatewayApiResponse = await axios.get(`${process.env.PARETOANYWHERE_URL}:${process.env.PORT}/api/gateway/getSingleGatewayByMAC/${highestRssiGateway.receiverId.toUpperCase()}`);
+              const gatewayData = gatewayApiResponse.data.data;
+              console.log(gatewayData);
               if (gatewayData.latitude && gatewayData.longitude) {
                 beacon.nearestGatewayData.latitude = gatewayData.latitude;
                 beacon.nearestGatewayData.longitude = gatewayData.longitude;
                 beacon.nearestGatewayData.saplocation = gatewayData.sapLocation;
               }
             } catch (error) {
-              console.error(`Error while calling the additional API for Gateway ${highestRssiGateway.receiverId.toUpperCase()}: ${error.message}`);
+              console.error(`Error while calling the additional API for Gatewaydata ${highestRssiGateway.receiverId.toUpperCase()}: ${error.message}`);
             }
           }
 
