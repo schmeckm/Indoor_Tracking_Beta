@@ -79,7 +79,6 @@ exports.getSingleGatewayByMAC = async (req, res) => {
   try {
     const { gatewayId } = req.params;
     const gateway = await Gateway.findOne({ gatewayMac: gatewayId });
-
     if (!gateway) {
       handleResponse(res, false, null, 'Gateway not found', 404);
     } else {
