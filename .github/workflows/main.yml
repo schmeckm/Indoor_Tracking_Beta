@@ -26,10 +26,10 @@ jobs:
         run: |
           ssh root@35.235.241.19 'pm2 stop pareto-anywhere'
 
-      - name: Server aktualisieren
+      - name: Update Server
         run: |
           ssh root@35.235.241.19 'cd /indoortrackingbackend && git pull'
 
-      - name: Anwendung mit PM2 starten
+      - name: Start App with PM2 
         run: |
           ssh root@35.235.241.19 'cd /indoortrackingbackend && pm2 start pareto-anywhere'
