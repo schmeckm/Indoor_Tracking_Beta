@@ -27,6 +27,7 @@ async function getGatewayData(deviceWithLowestRSSI) {
       `${process.env.Backend_URL}/api/gateway/getSingleGatewayByMAC/${deviceWithLowestRSSI.split("/").shift().toUpperCase()}`
     );
     // Return the gateway data from the response
+    //console.log(gatewayApiResponse);
     return gatewayApiResponse.data.data;
   } catch (error) {
     // Log and throw an error if the API request fails
@@ -40,7 +41,9 @@ exports.getPosition = async (req, res) => {
   try {
     // Fetch all the beacons from the database
     const beacons = await dbBeacon.find();
+    //console.log("Beacons die gefunden wurden" , beacons)
     // Initialize an empty array to store the result
+    //console.log(beacons);
     const resultBeacons = [];
 
     // Loop over each beacon
@@ -52,10 +55,14 @@ exports.getPosition = async (req, res) => {
       try {
         // Fetch the device data for the beacon
         const deviceData = await getDeviceData(beaconMac);
-
+        //console.log("Beacons die gefunden wurden" , deviceData)
+        
         // If device data is present
         if (deviceData) {
           const nearestData = deviceData.nearest;
+          const beaconMac = beacon.beaconMac.toLowerCase();
+
+          console.log("Nearest Gateway:" , nearestData, beaconMac)
           let deviceWithLowestRSSI = "";
 
           // If 'nearest' is an array and has data
@@ -70,7 +77,10 @@ exports.getPosition = async (req, res) => {
               beaconMac: newBeacon.beaconMac,
               NextGateway: deviceWithLowestRSSI.split("/").shift().toUpperCase(),
             };
-
+            
+            //Important step: Debug to show BeaconMAC with founded Gateway 
+            //console.log(newBeacon.basic);
+            
             // If dynamic data is present, add it to the newBeacon object
             if (deviceData && deviceData.dynamb) {
               newBeacon.dynamb = {
@@ -85,6 +95,7 @@ exports.getPosition = async (req, res) => {
                   uptime: deviceData.dynamb.uptime,
               };
             }
+            
             // If static data is present, add it to the newBeacon object
             if (deviceData.statid) {
               newBeacon.statid = {
@@ -101,12 +112,14 @@ exports.getPosition = async (req, res) => {
                 device: deviceWithLowestRSSI.split("/").shift().toUpperCase(),
                 RSSI: deviceData.nearest.rssi,
               };
+              //console.log(deviceData.nearest)
             }
 
             // Fetch the gateway data
             const gatewayData = await getGatewayData(deviceWithLowestRSSI);
-
             // If gateway data is present, add it to the newBeacon object
+            //console.log("Associated Gatewaydata by:", gatewayData)
+            
             if (gatewayData) {
               newBeacon.location = {
                 GatewayDescription: gatewayData.description,
@@ -115,6 +128,8 @@ exports.getPosition = async (req, res) => {
                 latitude: gatewayData.latitude,
                 longitude: gatewayData.longitude,
                 sapLocation: gatewayData.sapLocation,
+                tempCondition_Low: gatewayData.tempCondition_Low,
+                tempCondition_High:gatewayData.tempCondition_High
               };
             }
 
