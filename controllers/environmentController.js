@@ -1,7 +1,9 @@
+// Import necessary modules
 const Environment = require('../models/environment');
 const multer = require('multer');
 const fs = require('fs');
 
+// Utility function to handle API responses
 const handleResponse = (res, success, data, errorMessage, statusCode) => {
   if (success) {
     res.status(statusCode).json({ success: true, data });
@@ -10,7 +12,9 @@ const handleResponse = (res, success, data, errorMessage, statusCode) => {
   }
 };
 
+// Configure multer for file uploads (images in this case)
 const storage = multer.diskStorage({
+  // Define where the uploaded files should be saved
   destination: function (req, file, cb) {
     const uploadDir = 'uploads/';
     if (!fs.existsSync(uploadDir)) {
@@ -18,6 +22,7 @@ const storage = multer.diskStorage({
     }
     cb(null, uploadDir);
   },
+  // Define how the uploaded files should be named
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
     const ext = file.originalname.split('.').pop();
@@ -27,6 +32,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
+// Fetch all environments from the database
 exports.getAllEnvironments = async (req, res) => {
   try {
     const environments = await Environment.find();
@@ -36,6 +42,7 @@ exports.getAllEnvironments = async (req, res) => {
   }
 };
 
+// Add a new environment to the database
 exports.addEnvironment = async (req, res) => {
   try {
     const environment = await Environment.create(req.body);
@@ -45,6 +52,7 @@ exports.addEnvironment = async (req, res) => {
   }
 };
 
+// Delete a specific environment using its ID
 exports.deleteEnvironment = async (req, res) => {
   try {
     const { environmentId } = req.params;
@@ -60,13 +68,13 @@ exports.deleteEnvironment = async (req, res) => {
   }
 };
 
+// Update details of a specific environment using its ID
 exports.updateEnvironment = async (req, res) => {
   try {
     const { environmentId } = req.params;
     const { name, description, text1, text2, width, height, distance_points } = req.body;
 
     let updateObject = {};
-
     if (name) updateObject.name = name;
     if (description) updateObject.description = description;
     if (text1) updateObject.text1 = text1;
@@ -81,6 +89,7 @@ exports.updateEnvironment = async (req, res) => {
       return;
     }
 
+    // Handle image uploading and updating logic
     upload.single('image')(req, res, async (err) => {
       if (err) {
         handleResponse(res, false, null, err.message, 400);
@@ -88,10 +97,9 @@ exports.updateEnvironment = async (req, res) => {
         const image = req.file;
         if (image) {
           const ext = image.originalname.split('.').pop();
-          const filename = `${environmentId}.${ext}`; // Set filename as environmentId
+          const filename = `${environmentId}.${ext}`;
           const filePath = `uploads/${filename}`;
 
-          // Delete the old image if it exists
           if (existingEnvironment.image) {
             const oldImagePath = `uploads/${existingEnvironment.image}`;
             if (fs.existsSync(oldImagePath)) {
@@ -99,8 +107,8 @@ exports.updateEnvironment = async (req, res) => {
             }
           }
 
-          fs.renameSync(image.path, filePath); // Rename the file
-          updateObject.image = filename; // Set the filename in the updateObject
+          fs.renameSync(image.path, filePath);
+          updateObject.image = filename;
         }
 
         const updatedEnvironment = await Environment.findByIdAndUpdate(
@@ -116,7 +124,8 @@ exports.updateEnvironment = async (req, res) => {
     handleResponse(res, false, null, error.message, 500);
   }
 };
-//Test
+
+// Fetch details of a specific environment using its ID
 exports.getSingleEnvironment = async (req, res) => {
   try {
     const { environmentId } = req.params;

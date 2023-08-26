@@ -1,27 +1,35 @@
-name: Deploy to Server Management2
+name: Deployment of IndoorTracking to Server
 
 on:
   push:
     branches:
-      - master
+      - Development
 
 jobs:
   deploy:
     runs-on: self-hosted
 
     steps:
-      - name: Checkout Code
+      - name: Check Code out
         uses: actions/checkout@v2
-      
-      - name: Install SSH client
+
+      - name: SSH-Client installieren
         run: sudo apt-get install openssh-client -y
-      
-      - name: Configure SSH keys
+
+      - name: SSH-Schlüssel konfigurieren
         run: |
           mkdir -p ~/.ssh
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-        
-      - name: Update Server
+
+      - name: Stop old Application with PM2 stop
         run: |
-          ssh root@136.244.89.4 'cd /Indoor_Tracking_Beta && git pull'
+          ssh root@35.235.241.19 'pm2 stop pareto-anywhere'
+
+      - name: Server aktualisieren
+        run: |
+          ssh root@35.235.241.19 'cd /indoortrackingbackend && git pull'
+
+      - name: Anwendung mit PM2 starten
+        run: |
+          ssh root@35.235.241.19 'cd /indoortrackingbackend && pm2 start pareto-anywhere'

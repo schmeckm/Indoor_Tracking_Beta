@@ -1,5 +1,7 @@
+// Importing the beacon model
 const dbBeacon = require('../models/dbBeacon');
 
+// A utility function to handle and streamline API responses
 const handleResponse = (res, success, data, errorMessage) => {
   if (success) {
     res.status(200).json({ success: true, data });
@@ -8,6 +10,7 @@ const handleResponse = (res, success, data, errorMessage) => {
   }
 };
 
+// Fetch all the beacons from the database
 exports.getAllBeacons = async (req, res) => {
   try {
     const beacons = await dbBeacon.find();
@@ -18,6 +21,7 @@ exports.getAllBeacons = async (req, res) => {
   }
 };
 
+// Add a new beacon to the database
 exports.addBeacon = async (req, res) => {
   try {
     const beacon = await dbBeacon.create(req.body);
@@ -28,6 +32,7 @@ exports.addBeacon = async (req, res) => {
   }
 };
 
+// Fetch details of a specific beacon using its ID
 exports.getSingleBeacon = async (req, res) => {
   try {
     const beacon = await dbBeacon.findById(req.params.id);
@@ -38,6 +43,7 @@ exports.getSingleBeacon = async (req, res) => {
   }
 };
 
+// Update details of a specific beacon using its ID
 exports.updateBeacon = async (req, res) => {
   try {
     const beacon = await dbBeacon.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -48,6 +54,7 @@ exports.updateBeacon = async (req, res) => {
   }
 };
 
+// Delete a specific beacon using its ID
 exports.deleteBeacon = async (req, res) => {
   try {
     await dbBeacon.findByIdAndDelete(req.params.id);
