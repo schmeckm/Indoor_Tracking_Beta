@@ -13,22 +13,14 @@ jobs:
       - name: Check Code out
         uses: actions/checkout@v2
 
-      - name: SSH-Client installieren
-        run: sudo apt-get install openssh-client -y
-
-      - name: SSH-Schlüssel konfigurieren
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-
       - name: Stop old Application with PM2 stop
         run: |
           ssh root@35.235.241.19 'pm2 stop pareto-anywhere'
 
       - name: Update Server
         run: |
-          ssh root@35.235.241.19 'cd /indoortrackingbackend && git pull'
+          # Kopiert die aktuellen Repository-Dateien zum Zielverzeichnis
+          rsync -av --exclude='.git' ./ root@35.235.241.19:/indoortrackingbackend/
 
       - name: Start App with PM2 
         run: |
