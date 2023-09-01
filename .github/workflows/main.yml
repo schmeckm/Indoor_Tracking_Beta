@@ -26,4 +26,4 @@ jobs:
 
       # Starten Sie die App mit PM2, basierend auf Ihrem Start-Skript in package.json
       - name: Start App with PM2 
-        run: cd /indoortrackingbackend && pm2 start indoor_tracking
+        run: pm2 start npm --name "indoor_tracking" -- start
