@@ -15,7 +15,7 @@ jobs:
 
       - name: Stop old Application with PM2 stop
         run: |
-          pm2 stop pareto-anywhere'
+          pm2 stop pareto-anywhere
 
       - name: Update Server
         run: |
