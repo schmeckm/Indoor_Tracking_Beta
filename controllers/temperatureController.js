@@ -54,21 +54,42 @@ exports.getTemperaturesBetweenDates = async (req, res) => {
       const pipeline = [
           { $match: matchStage },
           { $unwind: "$events" },
-          { $match: matchStage['events.timestamp'] }, // match again after unwind
+          { $match: matchStage },
           {
               $group: {
                   _id: {
+                      beacon: "$beacon",
                       year: { $year: "$events.timestamp" },
                       month: { $month: "$events.timestamp" },
                       day: { $dayOfMonth: "$events.timestamp" },
                       hour: { $hour: "$events.timestamp" }
                   },
-                  averageTemperature: { $avg: "$events.temperature" },
-                  beacon: { $first: "$beacon" } // assuming beacon is the same for all records
-                  // Add other fields you need
+                  temperatures: { $push: "$events.temperature" },
+                  count: { $sum: 1 }
               }
           },
-          { $sort: { "_id": 1 } } // sort by date for convenience
+          {
+              $project: {
+                  beacon: "$_id.beacon",
+                  date: {
+                      year: "$_id.year",
+                      month: "$_id.month",
+                      day: "$_id.day",
+                      hour: "$_id.hour"
+                  },
+                  medianTemperature: {
+                      $cond: [
+                          { $eq: [{ $mod: ["$count", 2] }, 0] },
+                          { $avg: [
+                              { $arrayElemAt: ["$temperatures", { $subtract: [{ $divide: ["$count", 2]}, 1] }] },
+                              { $arrayElemAt: ["$temperatures", { $divide: ["$count", 2] }] }
+                          ]},
+                          { $arrayElemAt: ["$temperatures", { $floor: { $divide: ["$count", 2] } }] }
+                      ]
+                  }
+              }
+          },
+          { $sort: { "date": 1 } }
       ];
 
       // Fetch temperatures based on formed query.
@@ -84,6 +105,9 @@ exports.getTemperaturesBetweenDates = async (req, res) => {
       res.status(500).json({ success: false, message: error.message });
   }
 };
+
+
+
 
 
 
