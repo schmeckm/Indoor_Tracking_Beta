@@ -31,13 +31,13 @@ exports.addTemp = async (req, res) => {
 // Endpoint to retrieve temperatures between two dates.
 exports.getTemperaturesBetweenDates = async (req, res) => {
   try {
-    let query = {};
+    let matchQuery = {};
 
     // Check if beacon filter is provided in query.
     if (req.query.beacon) {
-        query.beacon = req.query.beacon;
+        matchQuery.beacon = req.query.beacon;
     }
-    
+
     const startDate = new Date(req.query.startDate);
     const endDate = new Date(req.query.endDate);
 
@@ -46,47 +46,50 @@ exports.getTemperaturesBetweenDates = async (req, res) => {
        return res.status(400).json({ success: false, message: "Invalid date format." });
     }
 
-    // Check if date filters are provided in query.
-    if (req.query.startDate && req.query.endDate) {
-      query['events.timestamp'] = {
-          $gte: startDate,
-          $lte: endDate
-      };
-    }
+    // Add date range to the match query.
+    matchQuery['events.timestamp'] = {
+        $gte: startDate,
+        $lte: endDate
+    };
+
+    const aggregatePipeline = [
+      { $match: matchQuery },
+      { $unwind: "$events" },
+      {
+          $group: {
+              _id: {
+                  year: { $year: "$events.timestamp" },
+                  month: { $month: "$events.timestamp" },
+                  day: { $dayOfMonth: "$events.timestamp" },
+                  hour: { $hour: "$events.timestamp" }
+              },
+              averageTemperature: { $avg: "$events.temperature" }
+          }
+      },
+      {
+          $sort: {
+              "_id.year": 1,
+              "_id.month": 1,
+              "_id.day": 1,
+              "_id.hour": 1
+          }
+      }
+    ];
 
     // Fetch temperatures based on formed query.
-    const temperatures = await temperature.find(query);
-    
-    if(!temperatures.length) {
+    const aggregatedTemperatures = await temperature.aggregate(aggregatePipeline);
+
+    if(!aggregatedTemperatures.length) {
         return res.status(404).json({ success: false, message: "No temperatures found for the provided criteria." });
     }
 
-    res.status(200).json({ success: true, data: temperatures });
+    res.status(200).json({ success: true, data: aggregatedTemperatures });
 
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };
 
-
-/**
- * Convert a duration from milliseconds to days, hours, and minutes.
- * 
- * @param {Number} milliseconds - Duration in milliseconds.
- * @returns {Object} - Duration broken down into days, hours, and minutes.
- */
-const millisecondsToDaysHoursMinutes = (milliseconds) => {
-  // Constants to represent various time durations.
-  const oneMinuteInMilliseconds = 60000;
-  const oneHourInMilliseconds = 3600000;
-  const oneDayInMilliseconds = 86400000;
-
-  const days = Math.floor(milliseconds / oneDayInMilliseconds);
-  const hours = Math.floor((milliseconds % oneDayInMilliseconds) / oneHourInMilliseconds);
-  const minutes = Math.floor((milliseconds % oneHourInMilliseconds) / oneMinuteInMilliseconds);
-
-  return { days, hours, minutes };
-};
 
 // Endpoint to calculate beacon duration in an SAP location.
 exports.getBeaconDurationInSAPLocation = async (req, res) => {
