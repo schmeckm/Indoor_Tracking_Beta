@@ -13,8 +13,6 @@ jobs:
       - name: Check Code out
         uses: actions/checkout@v2
 
-      # Wenn notwendig, können Sie zusätzliche Abhängigkeiten oder Tools installieren. 
-      # Zum Beispiel, wenn Sie pm2 nicht global installiert haben:
       - name: Install PM2
         run: sudo npm install pm2 -g
 
@@ -24,6 +22,9 @@ jobs:
       - name: Copy Files to Target Directory
         run: sudo cp -R . /indoortrackingbackend/
 
-      # Starten Sie die App mit PM2, basierend auf Ihrem Start-Skript in package.json
+      # Installieren Sie die Abhängigkeiten
+      - name: Install Dependencies
+        run: cd /indoortrackingbackend/ && sudo npm install
+
       - name: Start App with PM2 
         run: pm2 start /home/markus_schmeckenbecher/indoortrackingbackend/bin/indoor_tracking.js
