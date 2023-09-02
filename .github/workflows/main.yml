@@ -1,4 +1,4 @@
-name: Deployment of IndoorTracking to Server
+name: Deployment of IndoorTracking to Server 2
 
 on:
   push:
@@ -22,8 +22,8 @@ jobs:
       - name: Copy Files to Target Directory
         run: sudo cp -R . /indoortrackingbackend/
 
-      # Führt npm install im Zielverzeichnis aus
-      - name: Install Dependencies in Target Directory
+      # Installieren Sie die Abhängigkeiten im Zielverzeichnis
+      - name: Install Dependencies at Target
         run: |
           cd /indoortrackingbackend/
           sudo npm install
