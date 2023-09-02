@@ -38,8 +38,8 @@ exports.getTemperaturesBetweenDates = async (req, res) => {
         query.beacon = req.query.beacon;
     }
     
-    const startDate = new Date(req.query.startDate.replace('+0000', 'Z'));
-    const endDate = new Date(req.query.endDate.replace('+0000', 'Z'));
+    const startDate = new Date(req.query.startDate);
+    const endDate = new Date(req.query.endDate);
 
     // Validate the date inputs.
     if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
@@ -49,14 +49,17 @@ exports.getTemperaturesBetweenDates = async (req, res) => {
     // Check if date filters are provided in query.
     if (req.query.startDate && req.query.endDate) {
       query['events.timestamp'] = {
-          $gte: new Date(req.query.startDate),
-          $lte: new Date(req.query.endDate)
+          $gte: startDate,
+          $lte: endDate
       };
     }
-    console.log(query);
+
     // Fetch temperatures based on formed query.
     const temperatures = await temperature.find(query);
-    console.log(temperatures);
+    
+    if(!temperatures.length) {
+        return res.status(404).json({ success: false, message: "No temperatures found for the provided criteria." });
+    }
 
     res.status(200).json({ success: true, data: temperatures });
 
@@ -64,6 +67,7 @@ exports.getTemperaturesBetweenDates = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
 
 /**
  * Convert a duration from milliseconds to days, hours, and minutes.
