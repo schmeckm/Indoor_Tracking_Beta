@@ -28,67 +28,63 @@ exports.addTemp = async (req, res) => {
   }
 };
 
-// Endpoint to retrieve temperatures between two dates.
 exports.getTemperaturesBetweenDates = async (req, res) => {
   try {
-    let matchQuery = {};
+      let matchStage = {};
 
-    // Check if beacon filter is provided in query.
-    if (req.query.beacon) {
-        matchQuery.beacon = req.query.beacon;
-    }
-
-    const startDate = new Date(req.query.startDate);
-    const endDate = new Date(req.query.endDate);
-
-    // Validate the date inputs.
-    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-       return res.status(400).json({ success: false, message: "Invalid date format." });
-    }
-
-    // Add date range to the match query.
-    matchQuery['events.timestamp'] = {
-        $gte: startDate,
-        $lte: endDate
-    };
-
-    const aggregatePipeline = [
-      { $match: matchQuery },
-      { $unwind: "$events" },
-      {
-          $group: {
-              _id: {
-                  year: { $year: "$events.timestamp" },
-                  month: { $month: "$events.timestamp" },
-                  day: { $dayOfMonth: "$events.timestamp" },
-                  hour: { $hour: "$events.timestamp" }
-              },
-              averageTemperature: { $avg: "$events.temperature" }
-          }
-      },
-      {
-          $sort: {
-              "_id.year": 1,
-              "_id.month": 1,
-              "_id.day": 1,
-              "_id.hour": 1
-          }
+      // Check if beacon filter is provided in query.
+      if (req.query.beacon) {
+          matchStage.beacon = { $in: [req.query.beacon] };
       }
-    ];
 
-    // Fetch temperatures based on formed query.
-    const aggregatedTemperatures = await temperature.aggregate(aggregatePipeline);
+      const startDate = new Date(req.query.startDate);
+      const endDate = new Date(req.query.endDate);
 
-    if(!aggregatedTemperatures.length) {
-        return res.status(404).json({ success: false, message: "No temperatures found for the provided criteria." });
-    }
+      // Validate the date inputs.
+      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+          return res.status(400).json({ success: false, message: "Invalid date format." });
+      }
 
-    res.status(200).json({ success: true, data: aggregatedTemperatures });
+      matchStage['events.timestamp'] = {
+          $gte: startDate,
+          $lte: endDate
+      };
+
+      // Aggregation pipeline
+      const pipeline = [
+          { $match: matchStage },
+          { $unwind: "$events" },
+          { $match: matchStage['events.timestamp'] }, // match again after unwind
+          {
+              $group: {
+                  _id: {
+                      year: { $year: "$events.timestamp" },
+                      month: { $month: "$events.timestamp" },
+                      day: { $dayOfMonth: "$events.timestamp" },
+                      hour: { $hour: "$events.timestamp" }
+                  },
+                  averageTemperature: { $avg: "$events.temperature" },
+                  beacon: { $first: "$beacon" } // assuming beacon is the same for all records
+                  // Add other fields you need
+              }
+          },
+          { $sort: { "_id": 1 } } // sort by date for convenience
+      ];
+
+      // Fetch temperatures based on formed query.
+      const temperatures = await temperature.aggregate(pipeline);
+
+      if (!temperatures.length) {
+          return res.status(404).json({ success: false, message: "No temperatures found for the provided criteria." });
+      }
+
+      res.status(200).json({ success: true, data: temperatures });
 
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+      res.status(500).json({ success: false, message: error.message });
   }
 };
+
 
 
 // Endpoint to calculate beacon duration in an SAP location.
