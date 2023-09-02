@@ -22,9 +22,11 @@ jobs:
       - name: Copy Files to Target Directory
         run: sudo cp -R . /indoortrackingbackend/
 
-      # Installieren Sie die Abhängigkeiten
-      - name: Install Dependencies
-        run: cd /indoortrackingbackend/ && sudo npm install
+      # Führt npm install im Zielverzeichnis aus
+      - name: Install Dependencies in Target Directory
+        run: |
+          cd /indoortrackingbackend/
+          sudo npm install
 
       - name: Start App with PM2 
         run: pm2 start /home/markus_schmeckenbecher/indoortrackingbackend/bin/indoor_tracking.js
