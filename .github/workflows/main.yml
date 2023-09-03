@@ -1,4 +1,4 @@
-name: Deployment via Git Clone 2
+name: Deployment with PM2 Cleanup and Git Clone
 
 on:
   push:
@@ -10,7 +10,19 @@ jobs:
     runs-on: self-hosted
 
     steps:
+      - name: Check if any PM2 processes are running
+        id: pm2-check
+        run: |
+          if pm2 list --no-color | grep -q "online"; then
+            echo "PM2 processes are running."
+            echo "::set-output name=running::true"
+          else
+            echo "No PM2 processes found."
+            echo "::set-output name=running::false"
+          fi
+
       - name: Delete all PM2 processes
+        if: steps.pm2-check.outputs.running == 'true'
         run: pm2 delete all
       
       - name: Remove existing directory
