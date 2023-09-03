@@ -1,32 +1,36 @@
-name: Deployment of IndoorTracking to Server
+name: Deployment of IndoorTracking to Server using git pull
 
 on:
   push:
     branches:
-      - Development
+      - Deployment
 
 jobs:
   deploy:
     runs-on: self-hosted
 
     steps:
-      - name: Check Code out
-        uses: actions/checkout@v2
-
       - name: Install PM2
-        run: sudo npm install pm2 -g
+        run: sudo npm install pm2 -g || echo "PM2 already installed"
 
       - name: Stop old Application with PM2
         run: pm2 stop indoor_tracking || echo "Nothing to stop"
 
-      - name: Copy Files to Target Directory
-        run: sudo cp -R . /indoortrackingbackend/
+      # Stellen Sie sicher, dass Sie zuerst in das Zielverzeichnis wechseln
+      - name: Change directory
+        run: cd /indoortrackingbackend/
+
+      # Führen Sie git pull aus, um die neuesten Änderungen aus dem Repository zu ziehen
+      - name: Pull latest code
+        run: |
+          cd /indoortrackingbackend/
+          sudo git pull origin Deployment
 
       # Installieren Sie die Abhängigkeiten im Zielverzeichnis
-      - name: Install Dependencies at Target
+      - name: Install Dependencies
         run: |
           cd /indoortrackingbackend/
           sudo npm install
 
-      - name: Start App with PM2 
-        run: pm2 start /home/markus_schmeckenbecher/indoortrackingbackend/bin/indoor_tracking.js
+      - name: Start App with PM2
+        run: pm2 start /indoortrackingbackend/bin/indoor_tracking.js
