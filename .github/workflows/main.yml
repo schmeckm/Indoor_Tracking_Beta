@@ -1,4 +1,4 @@
-name: Deployment via Git Clone
+name: Deployment via Git Clone 2
 
 on:
   push:
