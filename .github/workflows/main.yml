@@ -24,13 +24,13 @@ jobs:
       - name: Pull latest code
         run: |
           cd /indoortrackingbackend/
-          sudo git pull origin Development
+          git pull origin Development
 
       # Installieren Sie die Abhängigkeiten im Zielverzeichnis
       - name: Install Dependencies
         run: |
           cd /indoortrackingbackend/
-          sudo npm install
+          npm install
 
       - name: Start App with PM2
         run: pm2 start /indoortrackingbackend/bin/indoor_tracking.js
