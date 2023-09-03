@@ -1,4 +1,4 @@
-name: Deployment with PM2 Cleanup and Git Clone
+name: Deployment with PM2 Cleanup and Git Clone2
 
 on:
   push:
