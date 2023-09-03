@@ -3,7 +3,7 @@ name: Deployment of IndoorTracking to Server using git pull
 on:
   push:
     branches:
-      - Deployment
+      - Development
 
 jobs:
   deploy:
