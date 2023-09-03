@@ -24,7 +24,7 @@ jobs:
       - name: Pull latest code
         run: |
           cd /indoortrackingbackend/
-          sudo git pull origin Deployment
+          sudo git pull origin Development
 
       # Installieren Sie die Abhängigkeiten im Zielverzeichnis
       - name: Install Dependencies
