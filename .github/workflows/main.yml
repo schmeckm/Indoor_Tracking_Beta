@@ -1,4 +1,4 @@
-name: Deployment of IndoorTracking to Server using git pull
+name: Deployment of IndoorTracking to Server using git pull 2
 
 on:
   push:
