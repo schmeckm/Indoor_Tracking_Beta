@@ -1,4 +1,4 @@
-const SystemSettings = require('../models/systemSettings');
+const SystemSettings = require('../models/SystemSettings');
 
 // Add new system settings to the database.
 exports.addSystemSettings = async (req, res) => {
