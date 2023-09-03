@@ -5,11 +5,13 @@ const logger = require("../log/loginfos"); // Logger for logging
 
 // Function to get device data from the ParetoAnywhere API
 async function getDeviceData(beaconMac) {
+  console.log(process.env.PARETOANYWHERE_URL);
   try {
     // Make a GET request to the API and store the response
     const apiResponse = await axios.get(
       `${process.env.PARETOANYWHERE_URL}/context/device/${beaconMac}/2`
     );
+    console.log("Markus");
     // Return the device data from the response
     return apiResponse.data.devices[`${beaconMac}/2`];
   } catch (error) {
@@ -45,6 +47,7 @@ exports.getPosition = async (req, res) => {
     // Initialize an empty array to store the result
     //console.log(beacons);
     const resultBeacons = [];
+    console.log(beacons);
 
     // Loop over each beacon
     for (const beacon of beacons) {
@@ -55,7 +58,7 @@ exports.getPosition = async (req, res) => {
       try {
         // Fetch the device data for the beacon
         const deviceData = await getDeviceData(beaconMac);
-        //console.log("Beacons die gefunden wurden" , deviceData)
+        console.log("Beacons die gefunden wurden" , deviceData)
         
         // If device data is present
         if (deviceData) {
