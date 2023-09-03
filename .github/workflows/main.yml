@@ -26,7 +26,7 @@ jobs:
         run: pm2 delete all
       
       - name: Remove existing directory
-        run: sudo rm -rf /indoortrackingbackend/
+        run: rm -rf /indoortrackingbackend/
 
       - name: Clone the repository
         run: git clone https://github.com/YourUsername/YourRepo.git /indoortrackingbackend/
