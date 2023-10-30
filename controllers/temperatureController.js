@@ -27,163 +27,167 @@ exports.addTemp = async (req, res) => {
     handleResponse(res, false, null, error.message, 500);
   }
 };
-
 exports.getTemperaturesBetweenDates = async (req, res) => {
   try {
-      let matchStage = {};
+    let matchStage = {};
 
-      // Check if beacon filter is provided in query.
-      if (req.query.beacon) {
-          matchStage.beacon = { $in: [req.query.beacon] };
-      }
+    if (req.query.beacon) {
+        matchStage.beacon = { $in: [req.query.beacon] };
+    }
 
-      const startDate = new Date(req.query.startDate);
-      const endDate = new Date(req.query.endDate);
+    const startDate = new Date(req.query.startDate);
+    const endDate = new Date(req.query.endDate);
 
-      // Validate the date inputs.
-      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-          return res.status(400).json({ success: false, message: "Invalid date format." });
-      }
+    // Validate the date inputs.
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+        return res.status(400).json({ success: false, message: "Invalid date format." });
+    }
 
-      matchStage['events.timestamp'] = {
-          $gte: startDate,
-          $lte: endDate
-      };
+    // Creating a combined matchStage for date filtering to avoid using it twice in the pipeline.
+    matchStage['events.timestamp'] = {
+        $gte: startDate,
+        $lte: endDate
+    };
 
-      // Aggregation pipeline
-      const pipeline = [
-          { $match: matchStage },
-          { $unwind: "$events" },
-          { $match: matchStage },
-          {
-              $group: {
-                  _id: {
-                      beacon: "$beacon",
-                      year: { $year: "$events.timestamp" },
-                      month: { $month: "$events.timestamp" },
-                      day: { $dayOfMonth: "$events.timestamp" },
-                      hour: { $hour: "$events.timestamp" }
-                  },
-                  temperatures: { $push: "$events.temperature" },
-                  count: { $sum: 1 }
-              }
-          },
-          {
-              $project: {
-                  beacon: "$_id.beacon",
-                  date: {
-                      year: "$_id.year",
-                      month: "$_id.month",
-                      day: "$_id.day",
-                      hour: "$_id.hour"
-                  },
-                  medianTemperature: {
-                      $cond: [
-                          { $eq: [{ $mod: ["$count", 2] }, 0] },
-                          { $avg: [
-                              { $arrayElemAt: ["$temperatures", { $subtract: [{ $divide: ["$count", 2]}, 1] }] },
-                              { $arrayElemAt: ["$temperatures", { $divide: ["$count", 2] }] }
-                          ]},
-                          { $arrayElemAt: ["$temperatures", { $floor: { $divide: ["$count", 2] } }] }
-                      ]
-                  }
-              }
-          },
-          { $sort: { "date": 1 } }
-      ];
+    // Simplifying the pipeline by removing one $match stage and adding allowDiskUse for dealing with memory issues.
+    const pipeline = [
+        { $match: matchStage },
+        { $unwind: "$events" },
+        {
+            $group: {
+                _id: {
+                    beacon: "$beacon",
+                    year: { $year: "$events.timestamp" },
+                    month: { $month: "$events.timestamp" },
+                    day: { $dayOfMonth: "$events.timestamp" },
+                    hour: { $hour: "$events.timestamp" }
+                },
+                temperatures: { $push: "$events.temperature" },
+                count: { $sum: 1 }
+            }
+        },
+        {
+            $project: {
+                beacon: "$_id.beacon",
+                date: {
+                    year: "$_id.year",
+                    month: "$_id.month",
+                    day: "$_id.day",
+                    hour: "$_id.hour"
+                },
+                medianTemperature: {
+                    $cond: [
+                        { $eq: [{ $mod: ["$count", 2] }, 0] },
+                        { $avg: [
+                            { $arrayElemAt: ["$temperatures", { $subtract: [{ $divide: ["$count", 2]}, 1] }] },
+                            { $arrayElemAt: ["$temperatures", { $divide: ["$count", 2] }] }
+                        ]},
+                        { $arrayElemAt: ["$temperatures", { $floor: { $divide: ["$count", 2] } }] }
+                    ]
+                }
+            }
+        },
+        { $sort: { "date": 1 } }
+    ];
 
-      // Fetch temperatures based on formed query.
-      const temperatures = await temperature.aggregate(pipeline);
+    // Fetch temperatures based on formed query. Added allowDiskUse(true) to handle potential memory issues.
+    const temperatures = await temperature.aggregate(pipeline).allowDiskUse(true);
 
-      if (!temperatures.length) {
-          return res.status(404).json({ success: false, message: "No temperatures found for the provided criteria." });
-      }
+    // 204 No Content might be more suitable for scenarios where the query is valid but results in no data.
+    if (!temperatures.length) {
+        return res.status(204).json({ success: false, message: "No temperatures found for the provided criteria." });
+    }
 
-      res.status(200).json({ success: true, data: temperatures });
+    res.status(200).json({ success: true, data: temperatures });
 
   } catch (error) {
       res.status(500).json({ success: false, message: error.message });
   }
 };
+// A utility function to convert milliseconds into days, hours, and minutes.
+const millisecondsToDaysHoursMinutes = (ms) => {
+  const seconds = Math.floor(ms / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
 
-
-
-
-
+  return {
+    days,
+    hours: hours % 24,
+    minutes: minutes % 60
+  };
+};
 
 // Endpoint to calculate beacon duration in an SAP location.
 exports.getBeaconDurationInSAPLocation = async (req, res) => {
   try {
-    // Extract beacon ID and date range from query.
-    const beaconId = req.query.beacon;
-    const startDate = new Date(req.query.startDate);
-    const endDate = new Date(req.query.endDate);
+    const { beacon: beaconId, startDate: start, endDate: end } = req.query;
 
+    // Validate query parameters.
+    if (!beaconId || isNaN(Date.parse(start)) || isNaN(Date.parse(end))) {
+      return res.status(400).json({ success: false, message: "Invalid input" });
+    }
+    
+    const startDate = new Date(start);
+    const endDate = new Date(end);
 
-    // Debugging logs.
-    console.log(`BeaconID: ${beaconId}`);
-    console.log(`StartDate: ${startDate}`);
-    console.log(`EndDate: ${endDate}`);
-
-    // Step 1: Create filter based on beacon and date range.
-    const filterByBeaconAndTime = {
+    if (endDate < startDate) {
+      return res.status(400).json({ success: false, message: "End date must be after start date" });
+    }
+    
+    const filter = {
       beacon: beaconId,
       "events.timestamp": { $gte: startDate, $lte: endDate }
     };
 
-    console.log(`Filter: ${JSON.stringify(filterByBeaconAndTime)}`);
-
-    // Step 2: Sort events by timestamp.
-    const sortEventsByTimestamp = { $sort: { "events.timestamp": 1 } };
-
-    // Step 3: Group by beacon and SAP-Location, then get the first and last timestamps.
-    const groupByBeaconAndSapLocation = {
-      $group: {
-        _id: {
-          sapLocation: "$sapLocation",
-          beacon: "$beacons"
-        },
-        firstTimestamp: { $first: "$events.timestamp" },
-        lastTimestamp: { $last: "$events.timestamp" },
-        tempConditionLow: { $first: "$tempConditionLow" },
-        tempConditionHigh: { $first: "$tempConditionHigh" }
-      }
-    };
-
-    // Step 4: Calculate the total time a beacon spent in a location.
-    const calculateTotalTimeSpent = {
-      $project: {
-        totalTimeSpent: {
-          $subtract: ["$lastTimestamp", "$firstTimestamp"]
-        },
-        tempConditionLow: 1,
-        tempConditionHigh: 1
-      }
-    };
-
-    // Execute the aggregation pipeline.
     const results = await temperature.aggregate([
-      { $match: filterByBeaconAndTime },
+      { $match: filter },
       { $unwind: "$events" },
-      sortEventsByTimestamp,
-      groupByBeaconAndSapLocation,
-      calculateTotalTimeSpent
+      { $sort: { "events.timestamp": 1 } },
+      {
+        $group: {
+          _id: {
+            sapLocation: "$sapLocation",
+            beacon: "$beacon"
+          },
+          firstTimestamp: { $first: "$events.timestamp" },
+          lastTimestamp: { $last: "$events.timestamp" },
+          tempConditionLow: { $first: "$tempConditionLow" },
+          tempConditionHigh: { $first: "$tempConditionHigh" }
+        }
+      },
+      {
+        $project: {
+          totalTimeSpent: {
+            $subtract: ["$lastTimestamp", "$firstTimestamp"]
+          },
+          tempConditionLow: 1,
+          tempConditionHigh: 1
+        }
+      }
     ]);
 
-    console.log(`Aggregation Results: ${JSON.stringify(results)}`);
+    if (results.length === 0) {
+      return res.status(404).json({ success: false, message: "No data found for provided criteria" });
+    }
 
-    // Break down the duration into days, hours, and minutes.
-    results.forEach(result => {
+    const enhancedResults = results.map(result => {
       const time = millisecondsToDaysHoursMinutes(result.totalTimeSpent);
-      result.totalTimeSpentDays = time.days;
-      result.totalTimeSpentHours = time.hours;
-      result.totalTimeSpentMinutes = time.minutes;
+      return {
+        ...result,
+        totalTimeSpentDays: time.days,
+        totalTimeSpentHours: time.hours,
+        totalTimeSpentMinutes: time.minutes
+      };
     });
 
-    res.status(200).json({ success: true, data: results });
+    res.status(200).json({ success: true, data: enhancedResults });
 
   } catch (error) {
     console.error(`Error encountered: ${error.message}`);
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+
+

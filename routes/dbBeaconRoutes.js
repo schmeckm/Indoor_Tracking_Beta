@@ -4,11 +4,12 @@ const router = express.Router();
 
 // Import methods from the beacon controller
 const {
-	addBeacon,
-	getAllBeacons,
-	deleteBeacon,
-	updateBeacon,
-	getSingleBeacon,
+    addBeacon,
+    getAllBeacons,
+    deleteBeacon,
+    updateBeacon,
+    getSingleBeacon,
+    getBeaconByMac,
 } = require('../controllers/dbBeaconController');
 
 // Define route to add a new beacon
@@ -25,6 +26,10 @@ router.put('/updateBeacon/:id', updateBeacon);
 
 // Define route to fetch details of a specific beacon using its ID
 router.get('/getSingleBeacon/:id', getSingleBeacon);
+
+
+// Define route to fetch details of a specific beacon using its ID
+router.get('/getBeaconByMac/:macAddress', getBeaconByMac);
 
 // Export the router for use in other parts of the application
 module.exports = router;
