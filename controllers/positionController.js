@@ -26,7 +26,7 @@ async function getGatewayData(deviceWithLowestRSSI) {
     try {
         // Make a GET request to the API and store the response
         const gatewayApiResponse = await axios.get(
-            `${process.env.Backend_URL}/api/gateway/getSingleGatewayByMAC/${deviceWithLowestRSSI.split("/").shift().toUpperCase()}`
+            `${process.env.BACKEND_URL}/api/gateway/getSingleGatewayByMAC/${deviceWithLowestRSSI.split("/").shift().toUpperCase()}`
         );
         // Return the gateway data from the response
         //console.log(gatewayApiResponse);
