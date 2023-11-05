@@ -1,16 +1,16 @@
 {
     "name": "indoortrackingbackend",
-    "homepage": "",
+    "version": "0.0.9",
+    "description": "Open source middleware suite for context-aware physical spaces based Pareto Anywhere API",
+    "license": "MIT",
     "author": {
         "name": "Markus Schmeckenbecher"
     },
-    "description": "Open source middleware suite for context-aware physical spaces based Pareto Anywhere APIs",
     "keywords": [
         "IoT",
         "RTLS",
         "M2M"
     ],
-    "version": "0.0.1",
     "engines": {
         "node": ">=12.0.0"
     },
@@ -19,7 +19,6 @@
     "scripts": {
         "start": "nodemon bin/indoor_tracking"
     },
-
     "repository": {
         "type": "git",
         "url": "https://github.com/schmeckm/indoortrackingbackend.git"
@@ -42,5 +41,5 @@
     "devDependencies": {
         "dotenv": "^16.3.1"
     },
-    "license": "MIT"
+
 }
